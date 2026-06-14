@@ -22,8 +22,15 @@ println("path_keys     = ", spec.path_keys, "   (dotted group.leaf names)")
 # expand: ConfigSpec → Vector{DataKey}, the Cartesian product × samples
 keys = ParamIO.expand(spec)
 npoints = length(keys) ÷ spec.study.total_samples
-println("\nexpand() → ", length(keys), " DataKeys  (",
-        npoints, " points × ", spec.study.total_samples, " samples)\n")
+println(
+    "\nexpand() → ",
+    length(keys),
+    " DataKeys  (",
+    npoints,
+    " points × ",
+    spec.study.total_samples,
+    " samples)\n",
+)
 
 # For each DataKey show:
 #   .params      — note keys are DOTTED ("system.N"), and fixed scalar "model.J"

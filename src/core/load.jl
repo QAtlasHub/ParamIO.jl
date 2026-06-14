@@ -43,5 +43,5 @@ function load(path::AbstractString; inherit::Bool=true)::ConfigSpec
         String[]
     end
 
-    ConfigSpec(study, path_keys, flat_blocks, sweep_order)
+    return ConfigSpec(study, path_keys, flat_blocks, sweep_order)
 end

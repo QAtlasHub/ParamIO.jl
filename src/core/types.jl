@@ -14,7 +14,7 @@ end
 
 function Base.showerror(io::IO, e::AmbiguousPathKeyError)
     hint = "\"$(e.groups[1]).$(e.leaf)\""
-    print(
+    return print(
         io,
         "AmbiguousPathKeyError: leaf \"$(e.leaf)\" appears in groups: ",
         join(e.groups, ", "),
@@ -57,7 +57,7 @@ end
 function ConfigSpec(
     study::StudySpec, path_keys::Vector{String}, paramsets::Vector{Dict{String,Any}}
 )
-    ConfigSpec(study, path_keys, paramsets, String[])
+    return ConfigSpec(study, path_keys, paramsets, String[])
 end
 
 """

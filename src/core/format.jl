@@ -31,7 +31,7 @@ function format_path(key::DataKey, path_keys::Vector{String})::String
             push!(parts, _format_val(pk, matches[1][2]))
         end
     end
-    join(parts, "_")
+    return join(parts, "_")
 end
 
 # Format one path_key + value: "sysN24", "chi40", "g0.50"

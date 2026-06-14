@@ -56,7 +56,7 @@ function expand(
             push!(result, DataKey(pt, s))
         end
     end
-    result
+    return result
 end
 
 """
@@ -103,5 +103,5 @@ function _cartesian_product(
         end
     end
     recurse(1, Dict{String,Any}())
-    result
+    return result
 end
