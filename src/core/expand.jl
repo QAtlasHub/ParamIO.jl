@@ -38,13 +38,21 @@ function expand(
         spec.path_keys
     end
 
-    seen = Set{Dict{String,Any}}()
+    # Deduplicate on the canonical identity, NOT on raw `Dict` equality. `Dict`
+    # `==` treats `1 == 1.0`, but `canonical` (the on-disk identity used by the
+    # downstream packages) keeps them distinct. Keying dedup on `canonical` makes
+    # expand's notion of "same point" identical to the on-disk directory
+    # identity: points that would share a directory are deduped, points that
+    # would get different directories are both kept. (sample is fixed at 0 here;
+    # it does not affect the param identity.)
+    seen = Set{String}()
     points = Dict{String,Any}[]
 
     for block in spec.paramsets
         for pt in _cartesian_product(block, order)
-            if pt ∉ seen
-                push!(seen, pt)
+            id = canonical(DataKey(pt, 0))
+            if id ∉ seen
+                push!(seen, id)
                 push!(points, pt)
             end
         end
@@ -53,7 +61,9 @@ function expand(
     result = DataKey[]
     for pt in points
         for s in 1:spec.study.total_samples
-            push!(result, DataKey(pt, s))
+            # `copy` so sibling samples don't alias one shared mutable `params`
+            # Dict — mutating one key's params must not corrupt its siblings.
+            push!(result, DataKey(copy(pt), s))
         end
     end
     result

@@ -1,0 +1,6 @@
+[base]
+inherit = "cycleA.toml"
+
+[[paramsets]]
+[paramsets.system]
+N = [2]
