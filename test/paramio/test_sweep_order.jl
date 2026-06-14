@@ -20,7 +20,7 @@ using ParamIO
 
 # DataKey のリストから sweep キーごとの値の出現順を取り出す
 function sweep_sequence(keys, key_name)
-    [k.params[key_name] for k in keys]
+    return [k.params[key_name] for k in keys]
 end
 
 # 連続する区間を「変化点」として抽出（外側ループほど変化が遅い）
@@ -29,7 +29,7 @@ function change_count(seq)
     for i in 2:length(seq)
         seq[i] != seq[i - 1] && (n += 1)
     end
-    n
+    return n
 end
 
 # ── 決定性 ───────────────────────────────────────────────────────────────────

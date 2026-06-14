@@ -1,0 +1,25 @@
+# A two-axis parameter sweep, to show what ParamIO.expand produces.
+#
+#   N ∈ {8, 16}  ×  g ∈ {0.5, 1.0}   = 4 parameter points
+#   × total_samples = 2              = 8 DataKeys
+#
+# `J` is a fixed scalar: it is NOT swept, but it IS carried in every DataKey.
+
+[study]
+project_name  = "demo"
+total_samples = 2
+outdir        = "out"
+
+[datavault]
+# Which params name the on-disk directory. Dotted form "group.leaf".
+# Note path_keys ⊆ params: J is in every key but not in the path.
+path_keys = ["system.N", "model.g"]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [8, 16]        # list ⇒ swept axis
+
+[paramsets.model]
+g = [0.5, 1.0]     # list ⇒ swept axis
+J = 1.0            # scalar ⇒ fixed, but still present in DataKey.params as "model.J"

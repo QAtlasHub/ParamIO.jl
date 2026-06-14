@@ -32,7 +32,7 @@ function _flatten_block(block::Dict)::Dict{String,Any}
             result[string(k)] = v
         end
     end
-    result
+    return result
 end
 
 """
@@ -52,5 +52,5 @@ function _merge_configs(parent::Dict{String,Any}, child::Dict{String,Any})::Dict
             result[k] = v
         end
     end
-    result
+    return result
 end
