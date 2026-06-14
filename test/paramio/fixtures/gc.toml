@@ -1,0 +1,8 @@
+[base]
+inherit = "mid.toml"
+
+[[paramsets]]
+[paramsets.system]
+N = [32]
+[paramsets.model]
+gc_marker = "GC"

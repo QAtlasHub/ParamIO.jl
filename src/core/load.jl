@@ -11,13 +11,7 @@ The optional `[datavault] sweep_order` key may be set in the TOML to
 override the default sweep enumeration order (which is `path_keys`).
 """
 function load(path::AbstractString; inherit::Bool=true)::ConfigSpec
-    raw = TOML.parsefile(path)
-
-    if inherit && haskey(raw, "base") && haskey(raw["base"], "inherit")
-        parent_path = joinpath(dirname(path), raw["base"]["inherit"])
-        parent_raw = TOML.parsefile(parent_path)
-        raw = _merge_configs(parent_raw, raw)
-    end
+    raw = _load_raw(path, inherit, String[])
 
     study_tbl = get(raw, "study", Dict{String,Any}())
     study = StudySpec(
@@ -44,4 +38,30 @@ function load(path::AbstractString; inherit::Bool=true)::ConfigSpec
     end
 
     return ConfigSpec(study, path_keys, flat_blocks, sweep_order)
+end
+
+"""
+    _load_raw(path, inherit, chain) -> Dict{String,Any}
+
+Parse the TOML at `path`, **recursively** merging `[base] inherit` parents so
+multi-level (grandparent and deeper) chains compose correctly. `chain` tracks
+the absolute paths visited so far and is used to detect inheritance cycles.
+"""
+function _load_raw(
+    path::AbstractString, inherit::Bool, chain::Vector{String}
+)::Dict{String,Any}
+    apath = abspath(path)
+    if apath in chain
+        error(
+            "ParamIO.load: circular [base] inherit detected: " *
+            join(vcat(chain, apath), " -> "),
+        )
+    end
+    raw = TOML.parsefile(path)
+    if inherit && haskey(raw, "base") && haskey(raw["base"], "inherit")
+        parent_path = joinpath(dirname(path), raw["base"]["inherit"])
+        parent_raw = _load_raw(parent_path, inherit, vcat(chain, apath))
+        raw = _merge_configs(parent_raw, raw)
+    end
+    return raw
 end

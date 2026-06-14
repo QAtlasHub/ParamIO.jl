@@ -50,6 +50,7 @@ function canonical(key::DataKey)::String
     io = IOBuffer()
     first_pair = true
     for (k, v) in pairs
+        _check_canonical_key(k)
         first_pair || print(io, ';')
         first_pair = false
         print(io, k, '=', _canonical_value(v))
@@ -57,6 +58,27 @@ function canonical(key::DataKey)::String
     first_pair || print(io, ';')
     print(io, "#sample=", key.sample)
     return String(take!(io))
+end
+
+"""
+    _check_canonical_key(k)
+
+Guard the `canonical` grammar: keys must not contain the reserved delimiters
+`;` or `=` (or a newline), otherwise two distinct `DataKey`s could serialize to
+the same string and collide on one on-disk identity. Config-sourced keys are
+always `group.leaf` (delimiter-free); this protects hand-built `DataKey`s.
+"""
+function _check_canonical_key(k::AbstractString)
+    if occursin(';', k) || occursin('=', k) || occursin('\n', k)
+        throw(
+            ArgumentError(
+                "ParamIO.canonical: param key $(repr(k)) contains a reserved " *
+                "delimiter (';', '=', or newline). Keys must be delimiter-free " *
+                "so the canonical identity stays unambiguous.",
+            ),
+        )
+    end
+    return nothing
 end
 
 function _canonical_value(v::Bool)

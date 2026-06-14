@@ -1,0 +1,13 @@
+[study]
+project_name  = "gp_study"
+total_samples = 1
+outdir        = "out"
+
+[datavault]
+path_keys = ["system.N"]
+
+[[paramsets]]
+[paramsets.system]
+N = [8]
+[paramsets.model]
+gp_marker = "GP"

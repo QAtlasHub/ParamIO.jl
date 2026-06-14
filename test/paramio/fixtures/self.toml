@@ -1,0 +1,6 @@
+[base]
+inherit = "self.toml"
+
+[[paramsets]]
+[paramsets.system]
+N = [1]
