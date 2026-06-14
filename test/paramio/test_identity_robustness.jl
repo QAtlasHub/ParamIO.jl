@@ -50,7 +50,8 @@ end
 end
 
 @testset "load: circular inherit is rejected" begin
-    @test_throws ErrorException ParamIO.load(joinpath(FIXTURES, "cycleA.toml"))
+    @test_throws ErrorException ParamIO.load(joinpath(FIXTURES, "cycleA.toml"))  # 2-cycle
+    @test_throws ErrorException ParamIO.load(joinpath(FIXTURES, "self.toml"))    # 1-cycle (self)
 end
 
 @testset "canonical: reserved delimiter in a key throws" begin
