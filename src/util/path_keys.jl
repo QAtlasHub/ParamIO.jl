@@ -26,7 +26,7 @@ function resolve_path_keys(flat_blocks::Vector{Dict{String,Any}})::Vector{String
         length(real) > 1 && throw(AmbiguousPathKeyError(leaf, real))
     end
 
-    sort(collect(all_keys))
+    return sort(collect(all_keys))
 end
 
 """
