@@ -9,24 +9,116 @@
 [![Build Status](https://github.com/sotashimozono/ParamIO.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/sotashimozono/ParamIO.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-this repository is made for template folder for developing julia project.  
-some of convenient features are available, but you need to fix to your current calculations.
+Read a config TOML and expand it into a list of `DataKey` — one per parameter
+point in a sweep. Pure parsing and Cartesian enumeration: no IO, no storage, no
+side effects.
 
-## TODO LIST
+ParamIO is **layer 1 of a three-package HPC stack**. It answers *what to
+compute*; [`DataVault.jl`](https://github.com/sotashimozono/DataVault.jl) answers
+*where results go* (`DataKey` → storage), and
+[`ParallelManager.jl`](https://github.com/sotashimozono/ParallelManager.jl)
+answers *do it* (`run!(work_fn, vault, keys)`, parallel and crash-recoverable).
 
-1. **GitHub Repository Settings**
-    * [ ] **Actions Permissions**: Go to `Settings > Actions > General` and change **Workflow permissions** to **"Read and write permissions"**. This is required for `Documenter.jl` (docs) and `TagBot` to function.
-    * [ ] **Allow Auto-merge**: (Recommended) Enable **"Allow auto-merge"** in `Settings > General` to streamline the PR process.
-2. **Testing & Code Quality**
-    * [ ] **Codecov Setup**: 
-        1. Register your repository at [Codecov](https://app.codecov.io/) to obtain an upload token.
-        2. Add the token to `Settings > Secrets and variables > Actions` as a repository secret named `CODECOV_TOKEN`.
-        3. Replace the **[Codecov Badge](#badge-top)** link at the top of this README with the one provided in your Codecov dashboard.
-3. **Documentation (Optional)**
-    * [ ] **Enable Workflow**: Rename `.github/workflows/Documentation.yml.disabled` to `.github/workflows/Documentation.yml` to enable automatic document building.
-    * [ ] **GitHub Pages**: After the first successful documentation build, go to `Settings > Pages` and set the source to the `gh-pages` branch.
-4. **Personalization**
-    * [ ] **LICENSE**: Update the year and name in the `LICENSE` file.
-    * [ ] **Badges**: Ensure all badge URLs at the top of this README point to your new repository path instead of the template.
+```text
+ParamIO            DataVault           ParallelManager
+config.toml  ──►   Vault(config)  ──►  run!(work_fn, vault, keys)
+   │  expand
+   ▼
+Vector{DataKey}
+```
 
-## IF YOU HAD SOME TROUBLES PLEASE MAKE `ISSUES` [HERE](https://github.com/sotashimozono/template.jl/issues)
+## Quick start
+
+```julia
+using ParamIO
+
+spec = ParamIO.load("config.toml")     # TOML → ConfigSpec
+keys = ParamIO.expand(spec)            # → Vector{DataKey}, one per (point × sample)
+
+k = keys[1]
+k.params              # Dict("system.N" => 8, "model.g" => 0.5, …)  — DOTTED keys
+k.sample              # 1
+ParamIO.format_path(k, spec.path_keys) # "sysN8_modg0.50"  — the on-disk dir name
+ParamIO.canonical(k)  # "model.g=0.5;system.N=8;#sample=1"  — stable identity
+```
+
+Run [`examples/inspect.jl`](examples/inspect.jl) to print the full expansion of a
+sample config — the fastest way to see what `expand` produces:
+
+```bash
+julia --project=. examples/inspect.jl
+```
+
+## Config schema
+
+```toml
+[study]
+project_name  = "demo"          # study name (used by DataVault)
+total_samples = 2               # repeats per parameter point
+outdir        = "out"           # default output root
+
+[datavault]
+path_keys = ["system.N", "model.g"]   # DOTTED keys that name the on-disk dirs
+# sweep_order = [...]                  # optional: override enumeration order
+
+[[paramsets]]
+[paramsets.system]
+N = [8, 16]                     # list  ⇒ swept axis
+[paramsets.model]
+g = [0.5, 1.0]                  # list  ⇒ swept axis
+J = 1.0                         # scalar ⇒ fixed (still present in every DataKey)
+```
+
+`expand` takes the Cartesian product of all list-valued params across every
+`[[paramsets]]` block, multiplies by `total_samples`, and deduplicates. Optional
+`[base] inherit = "parent.toml"` merges a parent config first.
+
+## The one thing that trips people up
+
+`DataKey.params` is keyed by the **dotted** `group.leaf` path, matching
+`path_keys`:
+
+```julia
+key.params["system.N"]   # ✅
+key.params["N"]          # ❌ KeyError
+```
+
+A fixed scalar (`J` above) is **not** swept but **is** carried in every `DataKey`
+as `"model.J"`. Only `path_keys` participate in `format_path` (the directory
+name); `canonical` uses *all* params plus the sample index.
+
+## API
+
+| Function | Use |
+| --- | --- |
+| `load(path; inherit=true) -> ConfigSpec` | parse TOML, merge `[base] inherit` |
+| `expand(spec; sweep_order=nothing) -> Vector{DataKey}` | Cartesian product × samples |
+| `format_path(key, path_keys) -> String` | compact directory segment |
+| `canonical(key) -> String` | stable, Julia-version-independent key identity |
+| `resolve_path_keys(blocks) -> Vector{String}` | auto-detect `path_keys` if omitted |
+
+## Source layout
+
+```text
+src/
+├── ParamIO.jl        module entry (includes + exports)
+├── core/             public API
+│   ├── types.jl      DataKey, ConfigSpec, StudySpec, errors
+│   ├── load.jl       TOML load + inherit merge
+│   ├── expand.jl     Cartesian expansion + sweep order
+│   ├── format.jl     format_path
+│   └── canonical.jl  canonical (FROZEN schema — downstream identity)
+└── util/             internal (flatten, path_keys)
+```
+
+## See also
+
+- [DataVault.jl](https://github.com/sotashimozono/DataVault.jl) — storage layer
+- [ParallelManager.jl](https://github.com/sotashimozono/ParallelManager.jl) — the runtime
+- [`../CLAUDE.md`](../CLAUDE.md) — how the three packages fit together
+
+Issues / requests: [GitHub Issues](https://github.com/sotashimozono/ParamIO.jl/issues).
+
+## License
+
+MIT.
