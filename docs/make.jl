@@ -30,4 +30,6 @@ makedocs(;
     pages=["Home" => "index.md"],
 )
 
-deploydocs(; repo="github.com/sotashimozono/ParamIO.jl.git", devbranch="main")
+deploydocs(;
+    repo="github.com/sotashimozono/ParamIO.jl.git", devbranch="main", push_preview=true
+)
