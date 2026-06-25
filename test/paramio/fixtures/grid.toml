@@ -1,0 +1,23 @@
+# grid sweep — a concise linspace axis, alongside an explicit list, plus proof that a namespace
+# which merely *contains* start/stop params is NOT mistaken for a grid.
+[study]
+project_name  = "test_grid"
+total_samples = 1
+outdir        = "out"
+
+[datavault]
+path_keys = ["system.T", "model.chi"]
+
+[[paramsets]]
+
+[paramsets.system]
+T = { start = 1.0, stop = 4.0, length = 7 }    # grid ⇒ swept axis: 1.0,1.5,…,4.0 (7 pts)
+N = 32                                          # fixed scalar
+
+[paramsets.model]
+chi = [16, 32]                                  # explicit list still works
+
+[paramsets.win]                                 # NOT a grid: has a non-grid key (`dt`)
+start = 0.0
+stop  = 10.0
+dt    = 0.01

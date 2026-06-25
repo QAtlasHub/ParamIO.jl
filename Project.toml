@@ -1,6 +1,6 @@
 name = "ParamIO"
 uuid = "938a3ac2-d340-473c-bcf1-88af577e4ccf"
-version = "0.3.2"
+version = "0.4.0"
 authors = ["sota shimozono <shimozono-sota631@g.ecc.u-tokyo.ac.jp>"]
 
 [deps]

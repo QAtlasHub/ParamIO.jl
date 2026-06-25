@@ -20,16 +20,20 @@ Flatten one `[[paramsets]]` block: sub-tables become dotted top-level keys.
 Example:
     {"system" => {"N" => [24,48], "chi" => 40}}
     → {"system.N" => [24,48], "system.chi" => 40}
+
+Grid specs (`{start, stop, length|step}` tables) are expanded to explicit sweep lists here, so the
+rest of the pipeline sees an ordinary list axis (see `grid.jl`). A grid table is treated as a leaf
+value, not a sub-table to descend into — `_is_grid` distinguishes it from a parameter namespace.
 """
 function _flatten_block(block::Dict)::Dict{String,Any}
     result = Dict{String,Any}()
     for (k, v) in block
-        if v isa Dict
+        if v isa Dict && !_is_grid(v)
             for (sk, sv) in v
-                result["$k.$sk"] = sv
+                result["$k.$sk"] = _expand_grid(sv)
             end
         else
-            result[string(k)] = v
+            result[string(k)] = _expand_grid(v)
         end
     end
     return result
