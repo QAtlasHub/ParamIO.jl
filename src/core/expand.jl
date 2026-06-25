@@ -97,7 +97,11 @@ function _cartesian_product(
         end
     end
 
-    fixed = Dict{String,Any}(k => v for (k, v) in flat if !(v isa AbstractArray))
+    # `_Literal` (a `{const = …}` value) is fixed, not swept — it is not an `AbstractArray`, so it
+    # lands here; unwrap it to the bare value it carries.
+    fixed = Dict{String,Any}(
+        k => _unwrap_literal(v) for (k, v) in flat if !(v isa AbstractArray)
+    )
     isempty(sweep_keys) && return [copy(fixed)]
 
     ranges = [flat[k] for k in sweep_keys]

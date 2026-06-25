@@ -20,6 +20,9 @@ storage. See [`../CLAUDE.md`](../CLAUDE.md) for how the three layers fit togethe
   list before the product (`length`→linspace `Float64`, integer `step`→`a:s:b` `Int`,
   `scale="log"`→geometric). A namespace that merely *contains* a `start`/`stop` param (plus, say,
   `dt`) is **not** a grid. See README's *Grid axes*.
+- **A `{const = X}` table is a fixed value** — the explicit dual of `list ⇒ sweep`: it pins `X`
+  (even a list) as one value, never swept. `J = {const = [1, 0.5]}` is one 2-vector; `J = [1, 0.5]`
+  is two runs. Implemented as a `_Literal` marker that `expand` unwraps.
 
 ## Where to look for usage
 

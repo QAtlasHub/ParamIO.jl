@@ -8,7 +8,8 @@ test_grid.jl — `{start, stop, length|step}` grid specs expand to sweep lists.
 - grid でない値（スカラー・リスト・grid キー以外を含む table）はそのまま素通し
 - _is_grid の判別（start/stop を *含むだけ* の namespace を grid と誤認しない）
 - 不正な spec は黙って固定値に落ちず error する（タイプミス検出）
-- load → expand 統合：grid 軸が Cartesian 積にそのまま乗る
+- const（`{const = X}`）= 固定値：list を *値* として渡せる（sweep されない）
+- load → expand 統合：grid 軸が Cartesian 積に乗り、const は全 key で固定
 """
 
 const _eg = ParamIO._expand_grid
@@ -65,6 +66,25 @@ end
     @test !_isg([1, 2])                                       # リスト
 end
 
+@testset "const: 固定値（list を *値* として渡す）" begin
+    @test ParamIO._is_const(Dict("const" => [1.0, 0.5]))
+    @test !ParamIO._is_const(Dict("const" => 1, "x" => 2))    # const 以外のキーがある → const spec でない
+    @test !ParamIO._is_const(Dict("a" => 1))
+    @test !ParamIO._is_const([1, 2])
+    # _flatten_value: const → _Literal、grid → list、それ以外 → 素通し
+    lit = ParamIO._flatten_value(Dict("const" => [1.0, 0.5]))
+    @test lit isa ParamIO._Literal
+    @test lit.value == [1.0, 0.5]
+    @test ParamIO._flatten_value([1, 2]) == [1, 2]
+    @test ParamIO._flatten_value(Dict("start" => 1.0, "stop" => 4.0, "length" => 4)) ==
+        [1.0, 2.0, 3.0, 4.0]
+    # 同じ [1.0, 0.5] が list なら swept（配列のまま）、const なら固定（_Literal）
+    swept = ParamIO._flatten_block(Dict("m" => Dict("a" => [1.0, 0.5])))
+    @test swept["m.a"] == [1.0, 0.5]                          # 配列 → expand で swept
+    pinned = ParamIO._flatten_block(Dict("m" => Dict("a" => Dict("const" => [1.0, 0.5]))))
+    @test pinned["m.a"] isa ParamIO._Literal                  # const → 固定
+end
+
 @testset "grid: 不正な spec は error する（黙って固定値に落ちない）" begin
     @test_throws ErrorException _eg(Dict("start" => 1.0, "stop" => 4.0))                       # length/step 無し
     @test_throws ErrorException _eg(
@@ -97,4 +117,7 @@ end
     @test all(k.params["win.start"] == 0.0 for k in keys)
     @test all(k.params["win.stop"] == 10.0 for k in keys)
     @test all(k.params["win.dt"] == 0.01 for k in keys)
+    # const: 固定ベクトル J は全 key で同一（振られない）。_Literal は素の list に unwrap 済
+    @test all(k.params["system.J"] == [1.0, 0.5, 0.5] for k in keys)
+    @test occursin("system.J=[1.0, 0.5, 0.5]", ParamIO.canonical(keys[1]))
 end

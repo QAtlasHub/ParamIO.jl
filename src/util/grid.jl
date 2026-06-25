@@ -86,3 +86,47 @@ function _expand_grid(v)
         return pts
     end
 end
+
+# ── const: a fixed value — the explicit dual of `list ⇒ sweep` ──────────────────
+#
+# `list ⇒ swept axis` is convenient but leaves no way to pass a list as a *value* — an inhomogeneous
+# coupling vector {Jᵢ}, a field profile — since `J = [1.0, 0.5]` would sweep two runs. A `{const = X}`
+# table pins X as one fixed value: `_flatten_block` wraps it as `_Literal`, which `expand` treats as
+# fixed (it is not an `AbstractArray`) and unwraps back to X in every `DataKey`.
+
+"""
+    _Literal(value)
+
+A flatten-time marker meaning "`value` is a fixed parameter value, not a swept axis". `expand`
+classifies it as fixed (it is not an `AbstractArray`) and unwraps it to `value` in every `DataKey`,
+so a list can be a *value* (`{const = [1.0, 0.5]}`) instead of a sweep.
+"""
+struct _Literal
+    value::Any
+end
+
+_unwrap_literal(v) = v isa _Literal ? v.value : v
+
+"""
+    _is_const(v) -> Bool
+
+`true` when `v` is a *const spec*: a table whose only key is `const`. `{const = X}` pins `X` as one
+fixed value (never swept) — the explicit counterpart to `list ⇒ sweep`.
+"""
+_is_const(v)::Bool = v isa AbstractDict && length(v) == 1 && haskey(v, "const")
+
+"""
+    _is_spec(v) -> Bool
+
+`true` when `v` is any leaf-table spec — a grid (`{start, stop, …}`, a swept list) or a const
+(`{const = X}`, a fixed value). `_flatten_block` treats a spec as a leaf, not a namespace to descend.
+"""
+_is_spec(v)::Bool = _is_grid(v) || _is_const(v)
+
+"""
+    _flatten_value(v) -> v
+
+Resolve a leaf value: a const spec → a `_Literal` (fixed), a grid spec → an explicit list (swept),
+anything else unchanged.
+"""
+_flatten_value(v) = _is_const(v) ? _Literal(v["const"]) : _expand_grid(v)

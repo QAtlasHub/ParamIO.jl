@@ -89,6 +89,19 @@ hand-typed list. It expands to a list *before* the product, so it sweeps exactly
 **errors** (it never silently degrades to a fixed value). A namespace that merely *contains* a
 `start`/`stop` parameter alongside others (e.g. a `dt`) is **not** a grid.
 
+### Fixed list values — `{ const = … }`
+
+A plain list is **always** a swept axis. To pass a list as a *value* — an inhomogeneous coupling
+vector, a field profile — wrap it in `const`; it is never swept:
+
+```toml
+J  = { const = [1.0, 0.5, 0.5] }   # one fixed 3-vector, carried in every DataKey
+Js = [1.0, 0.5, 0.5]               # three separate runs (a sweep)
+```
+
+So the two leaf-table forms are duals: a **grid** (`{ start, stop, … }`) is a swept list, a
+**const** (`{ const = … }`) is a fixed value.
+
 ## The one thing that trips people up
 
 `DataKey.params` is keyed by the **dotted** `group.leaf` path, matching
