@@ -64,6 +64,7 @@ path_keys = ["system.N", "model.g"]   # DOTTED keys that name the on-disk dirs
 [[paramsets]]
 [paramsets.system]
 N = [8, 16]                     # list  ⇒ swept axis
+T = { start = 1.0, stop = 4.0, length = 31 }   # grid ⇒ swept axis (31-pt linspace)
 [paramsets.model]
 g = [0.5, 1.0]                  # list  ⇒ swept axis
 J = 1.0                         # scalar ⇒ fixed (still present in every DataKey)
@@ -72,6 +73,34 @@ J = 1.0                         # scalar ⇒ fixed (still present in every DataK
 `expand` takes the Cartesian product of all list-valued params across every
 `[[paramsets]]` block, multiplies by `total_samples`, and deduplicates. Optional
 `[base] inherit = "parent.toml"` merges a parent config first.
+
+### Grid axes — concise sweeps
+
+For a fine Monte-Carlo or finite-size-scaling sweep, write an axis as a **grid** instead of a
+hand-typed list. It expands to a list *before* the product, so it sweeps exactly like one:
+
+| form | expands to |
+| --- | --- |
+| `{ start = 1.0, stop = 4.0, length = 31 }` | 31-point linspace, inclusive → `Float64` |
+| `{ start = 16, stop = 128, step = 16 }` | `16:16:128` → `Int` |
+| `{ start = 1e-3, stop = 1.0, length = 7, scale = "log" }` | 7 log-spaced points |
+
+`length` (≥ 2) and `step` are mutually exclusive; exactly one is required. A malformed grid
+**errors** (it never silently degrades to a fixed value). A namespace that merely *contains* a
+`start`/`stop` parameter alongside others (e.g. a `dt`) is **not** a grid.
+
+### Fixed list values — `{ const = … }`
+
+A plain list is **always** a swept axis. To pass a list as a *value* — an inhomogeneous coupling
+vector, a field profile — wrap it in `const`; it is never swept:
+
+```toml
+J  = { const = [1.0, 0.5, 0.5] }   # one fixed 3-vector, carried in every DataKey
+Js = [1.0, 0.5, 0.5]               # three separate runs (a sweep)
+```
+
+So the two leaf-table forms are duals: a **grid** (`{ start, stop, … }`) is a swept list, a
+**const** (`{ const = … }`) is a fixed value.
 
 ## The one thing that trips people up
 

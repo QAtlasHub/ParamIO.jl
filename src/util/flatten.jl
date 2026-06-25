@@ -20,16 +20,21 @@ Flatten one `[[paramsets]]` block: sub-tables become dotted top-level keys.
 Example:
     {"system" => {"N" => [24,48], "chi" => 40}}
     → {"system.N" => [24,48], "system.chi" => 40}
+
+Leaf-table specs are resolved here (see `grid.jl`), so the rest of the pipeline sees ordinary
+values: a grid (`{start, stop, length|step}`) becomes a swept list, a const (`{const = X}`) becomes
+a fixed `_Literal(X)`. A spec is treated as a leaf, not a sub-table to descend into — `_is_spec`
+distinguishes it from a parameter namespace.
 """
 function _flatten_block(block::Dict)::Dict{String,Any}
     result = Dict{String,Any}()
     for (k, v) in block
-        if v isa Dict
+        if v isa Dict && !_is_spec(v)
             for (sk, sv) in v
-                result["$k.$sk"] = sv
+                result["$k.$sk"] = _flatten_value(sv)
             end
         else
-            result[string(k)] = v
+            result[string(k)] = _flatten_value(v)
         end
     end
     return result

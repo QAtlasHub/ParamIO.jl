@@ -6,6 +6,7 @@ ParamIO — config TOML を読み込み、`DataKey` のリストに展開する
 - `core/load.jl`      TOML 読み込みと継承マージ
 - `core/expand.jl`    Cartesian 展開と sweep 順序制御
 - `core/format.jl`    DataKey からパス文字列を生成
+- `util/grid.jl`      `{start,stop,length|step}` grid spec → sweep リスト展開
 - `util/flatten.jl`   サブテーブルのフラット化、ドット記法分解
 - `util/path_keys.jl` path_keys の自動解決と検証
 """
@@ -21,6 +22,7 @@ export canonical
 include("core/types.jl")
 
 # ── Util (core が依存する) ────────────────────────────────────────────────────
+include("util/grid.jl")
 include("util/flatten.jl")
 include("util/path_keys.jl")
 
