@@ -45,19 +45,34 @@ Fields:
                   where sub-table keys are prefixed as `"group.leaf"`
 - `sweep_order`:  optional explicit sweep ordering for `expand`. If empty,
                   `path_keys` is used as the default sweep order.
+- `float_format`: how float path segments are rendered — `"fixed2"` (default:
+                  the legacy `%.2f`) or `"auto"` (content-aware, per-axis
+                  injective+lossless; see `build_axis_formats` / `format_path`).
+                  Set via `[datavault] float_format`. Never affects `canonical`.
 """
 struct ConfigSpec
     study::StudySpec
     path_keys::Vector{String}
     paramsets::Vector{Dict{String,Any}}
     sweep_order::Vector{String}
+    float_format::String
 end
 
-# Backward-compatible constructor (no sweep_order)
+# Backward-compatible constructor (no float_format) → legacy fixed2 default
+function ConfigSpec(
+    study::StudySpec,
+    path_keys::Vector{String},
+    paramsets::Vector{Dict{String,Any}},
+    sweep_order::Vector{String},
+)
+    return ConfigSpec(study, path_keys, paramsets, sweep_order, "fixed2")
+end
+
+# Backward-compatible constructor (no sweep_order, no float_format)
 function ConfigSpec(
     study::StudySpec, path_keys::Vector{String}, paramsets::Vector{Dict{String,Any}}
 )
-    return ConfigSpec(study, path_keys, paramsets, String[])
+    return ConfigSpec(study, path_keys, paramsets, String[], "fixed2")
 end
 
 """
