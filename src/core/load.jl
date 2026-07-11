@@ -37,7 +37,20 @@ function load(path::AbstractString; inherit::Bool=true)::ConfigSpec
         String[]
     end
 
-    return ConfigSpec(study, path_keys, flat_blocks, sweep_order)
+    # Optional float path-segment format: "fixed2" (default, legacy %.2f) or
+    # "auto" (content-aware, per-axis injective+lossless). Additive; unset ⇒ fixed2.
+    float_format = if haskey(raw, "datavault") && haskey(raw["datavault"], "float_format")
+        ff = String(raw["datavault"]["float_format"])
+        ff in ("fixed2", "auto") || error(
+            "ParamIO.load: [datavault] float_format = $(repr(ff)) is invalid; " *
+            "expected \"fixed2\" or \"auto\".",
+        )
+        ff
+    else
+        "fixed2"
+    end
+
+    return ConfigSpec(study, path_keys, flat_blocks, sweep_order, float_format)
 end
 
 """

@@ -16,7 +16,9 @@ using TOML, Printf
 
 export ConfigSpec, StudySpec, DataKey, AmbiguousPathKeyError
 export load, expand, format_path, resolve_path_keys
+export build_axis_formats, AxisFloatFmt
 export canonical
+export diagnose, DiagnosticReport
 
 # ── Core ──────────────────────────────────────────────────────────────────────
 include("core/types.jl")
@@ -31,5 +33,6 @@ include("core/load.jl")
 include("core/expand.jl")
 include("core/format.jl")
 include("core/canonical.jl")
+include("core/diagnose.jl")
 
 end # module ParamIO

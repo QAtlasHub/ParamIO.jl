@@ -1,0 +1,17 @@
+# model.h is a swept axis (2 values) but path_keys OMITS it → invisible param
+# ⇒ the 4 distinct points collapse onto 2 directory names (path collisions).
+[study]
+project_name  = "test_invisible"
+total_samples = 1
+outdir        = "out"
+
+[datavault]
+path_keys = ["system.N"]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [24, 48]
+
+[paramsets.model]
+h = [0.0, 0.1]

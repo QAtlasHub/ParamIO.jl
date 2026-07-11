@@ -1,0 +1,14 @@
+# The value 24 is repeated in the N list → the same param assignment is enumerated twice.
+# `expand` silently dedups it; `diagnose` surfaces it as a duplicate with multiplicity.
+[study]
+project_name  = "test_duplicate"
+total_samples = 1
+outdir        = "out"
+
+[datavault]
+path_keys = ["system.N"]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [24, 24, 48]
