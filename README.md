@@ -5,7 +5,7 @@
 [![Julia](https://img.shields.io/badge/julia-v1.12+-9558b2.svg)](https://julialang.org)
 [![Code Style: Blue](https://img.shields.io/badge/Code%20Style-Blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
-[![codecov](https://codecov.io/gh/sotashimozono/ParamIO.jl/graph/badge.svg?token=57dh1RFl0t)](https://codecov.io/gh/sotashimozono/ParamIO.jl)
+[![codecov](https://codecov.io/gh/QAtlasHub/ParamIO.jl/graph/badge.svg?token=57dh1RFl0t)](https://codecov.io/gh/QAtlasHub/ParamIO.jl)
 [![Build Status](https://github.com/sotashimozono/ParamIO.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/sotashimozono/ParamIO.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
