@@ -4,4 +4,4 @@ on:
     branches: [main]
 jobs:
   version:
-    uses: QAtlasHub/.github/.github/workflows/version-check.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/version-check.yml@main

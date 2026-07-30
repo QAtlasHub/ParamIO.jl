@@ -3,4 +3,4 @@ on:
   workflow_run: { workflows: ["Release Drafter"], types: [completed], branches: [main] }
 jobs:
   register:
-    uses: QAtlasHub/.github/.github/workflows/autoregister.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/autoregister.yml@main
