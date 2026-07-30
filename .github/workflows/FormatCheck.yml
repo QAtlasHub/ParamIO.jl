@@ -2,4 +2,4 @@ name: Format Check
 on: { pull_request: { paths: ['**/*.jl'] } }
 jobs:
   format:
-    uses: QAtlasHub/.github/.github/workflows/format-check.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/format-check.yml@main

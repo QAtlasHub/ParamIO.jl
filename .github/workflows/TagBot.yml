@@ -4,5 +4,5 @@ on:
   workflow_dispatch: { inputs: { lookback: { default: "3" } } }
 jobs:
   tagbot:
-    uses: QAtlasHub/.github/.github/workflows/tagbot.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/tagbot.yml@main
     secrets: inherit

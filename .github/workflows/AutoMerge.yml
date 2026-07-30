@@ -4,5 +4,5 @@ on:
     types: [opened, synchronize, reopened, labeled]
 jobs:
   automerge:
-    uses: QAtlasHub/.github/.github/workflows/automerge.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/automerge.yml@main
     secrets: inherit

@@ -4,5 +4,5 @@ on:
   workflow_dispatch:
 jobs:
   compathelper:
-    uses: QAtlasHub/.github/.github/workflows/compathelper.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/compathelper.yml@main
     secrets: inherit

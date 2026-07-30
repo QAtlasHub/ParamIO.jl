@@ -4,6 +4,6 @@ on:
   pull_request: {}
 jobs:
   ci:
-    uses: QAtlasHub/.github/.github/workflows/julia-ci.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/julia-ci.yml@main
     with: { shards: 1 }
     secrets: inherit

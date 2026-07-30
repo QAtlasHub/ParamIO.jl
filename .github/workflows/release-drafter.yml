@@ -4,5 +4,5 @@ on:
   pull_request: { types: [opened, reopened, synchronize, edited] }
 jobs:
   draft:
-    uses: QAtlasHub/.github/.github/workflows/release-drafter.yml@v1
+    uses: QAtlasHub/.github/.github/workflows/release-drafter.yml@main
     secrets: inherit
