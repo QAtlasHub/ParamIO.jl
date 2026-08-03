@@ -1,6 +1,6 @@
 name = "ParamIO"
 uuid = "938a3ac2-d340-473c-bcf1-88af577e4ccf"
-version = "0.4.5"
+version = "0.4.6"
 authors = ["sota shimozono <shimozono-sota631@g.ecc.u-tokyo.ac.jp>"]
 
 [deps]
@@ -10,10 +10,12 @@ TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 [compat]
 Printf = "1.11.0"
 TOML = "1.0.3"
+TestShards = "0.3"
 julia = "1.11"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestShards = "acceef1d-f5e0-4fe4-a546-818dc56ce7b2"
 
 [targets]
-test = ["Test"]
+test = ["Test", "TestShards"]
