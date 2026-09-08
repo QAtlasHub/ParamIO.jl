@@ -27,6 +27,7 @@ include("core/types.jl")
 # ── Util (core が依存する) ────────────────────────────────────────────────────
 include("util/grid.jl")
 include("util/flatten.jl")
+include("util/resolve.jl")
 include("util/path_keys.jl")
 
 # ── Core API ──────────────────────────────────────────────────────────────────

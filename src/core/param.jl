@@ -4,8 +4,8 @@
     param(key, name) -> Any
     param(key, name, T) -> T
 
-The value `name` selects in `key`, resolved the way `format_path` resolves a `path_key`: an exact
-match on the dotted name first, then a unique match on the leaf.
+The value `name` selects in `key`, resolved by the same rule as a `path_key`: an exact match on the
+dotted name, else a unique match on the leaf. See `_resolve_name`.
 
 `work_fn` is otherwise written as `Float64(key.params["system.kbT"])`, and both halves of that are
 a hazard.
@@ -27,29 +27,7 @@ kT = param(key, "kbT", Float64)          # leaf form, when it is unambiguous
 ```
 """
 function param(key::DataKey, name::AbstractString)
-    val = get(key.params, name, nothing)
-    val !== nothing && return val
-
-    _, leaf = _split_dotted(name)
-    if leaf == name
-        matches = [(k, v) for (k, v) in key.params if _split_dotted(k)[2] == name]
-        if length(matches) == 1
-            return matches[1][2]
-        elseif length(matches) > 1
-            # Same error the path builder raises for the same reason, carrying the GROUPS rather
-            # than the full names — that is what its message asks the caller to disambiguate with.
-            throw(
-                AmbiguousPathKeyError(
-                    name, sort!([_split_dotted(k)[1] for (k, _) in matches])
-                ),
-            )
-        end
-    end
-    return error(
-        "DataKey has no parameter \"$name\". It carries: " *
-        join(sort!(collect(Base.keys(key.params))), ", ") *
-        ".",
-    )
+    return key.params[_resolve_name(name, Base.keys(key.params))]
 end
 
 function param(key::DataKey, name::AbstractString, ::Type{T}) where {T}

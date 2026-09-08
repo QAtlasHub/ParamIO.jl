@@ -165,13 +165,14 @@ end
 # exact-then-leaf lookup. Returns `nothing` when absent or ambiguous (build then
 # simply skips it — a non-float / unresolvable axis gets no auto entry).
 function _resolve_axis_value(key::DataKey, pk::String)
-    val = get(key.params, pk, nothing)
-    val !== nothing && return val
-    _, leaf = _split_dotted(pk)
-    leaf == pk || return nothing
-    matches = Any[v for (k, v) in key.params if _split_dotted(k)[2] == pk]
-    length(matches) == 1 || return nothing
-    return matches[1]
+    # Absent and ambiguous are both "no auto entry" here, so the shared resolver's errors are
+    # swallowed deliberately — this is the one caller for which either is a normal outcome.
+    resolved = try
+        _resolve_name(pk, Base.keys(key.params))
+    catch
+        return nothing
+    end
+    return key.params[resolved]
 end
 
 """
