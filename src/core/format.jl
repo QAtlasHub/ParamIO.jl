@@ -165,14 +165,14 @@ end
 # exact-then-leaf lookup. Returns `nothing` when absent or ambiguous (build then
 # simply skips it — a non-float / unresolvable axis gets no auto entry).
 function _resolve_axis_value(key::DataKey, pk::String)
-    # Absent and ambiguous are both "no auto entry" here, so the shared resolver's errors are
-    # swallowed deliberately — this is the one caller for which either is a normal outcome.
-    resolved = try
-        _resolve_name(pk, Base.keys(key.params))
-    catch
-        return nothing
-    end
-    return key.params[resolved]
+    # Absent and ambiguous are both "no auto entry" here, so this asks for the outcome rather than
+    # catching a raise: a `try` would have taken an InterruptException, or a bug in the resolver,
+    # with the same hand as the two conditions it means to allow — and `build_axis_formats` would
+    # then report "this axis has no auto format", which is how two distinct values come to share a
+    # directory name (see the header of this file).
+    found = _lookup_name(pk, Base.keys(key.params))
+    found isa String || return nothing
+    return key.params[found]
 end
 
 """

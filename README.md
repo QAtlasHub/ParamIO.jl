@@ -108,8 +108,12 @@ So the two leaf-table forms are duals: a **grid** (`{ start, stop, … }`) is a 
 `path_keys`:
 
 ```julia
-key.params["system.N"]   # ✅
-key.params["N"]          # ❌ KeyError
+param(key, "system.N")   # ✅  dotted
+param(key, "N")          # ✅  the leaf, when only one group has it
+param(key, "N", Float64) # ✅  …and refuses the conversion if it would change the number
+
+key.params["system.N"]   # ✅  the raw Dict is still there
+key.params["N"]          # ❌  KeyError — no resolution, and no report of what does exist
 ```
 
 A fixed scalar (`J` above) is **not** swept but **is** carried in every `DataKey`
@@ -124,6 +128,7 @@ name); `canonical` uses *all* params plus the sample index.
 | `expand(spec; sweep_order=nothing) -> Vector{DataKey}` | Cartesian product × samples |
 | `format_path(key, path_keys) -> String` | compact directory segment |
 | `canonical(key) -> String` | stable, Julia-version-independent key identity |
+| `param(key, name[, T]) -> value` | one parameter, resolved dotted-or-leaf and optionally typed |
 | `resolve_path_keys(blocks) -> Vector{String}` | auto-detect `path_keys` if omitted |
 
 ## Source layout

@@ -17,8 +17,12 @@ them until a point is computed. `param` reports what the key does carry instead.
 
 The type is the other half. TOML gives `2` as `Int64` and `2.0` as `Float64`, so a config edited
 from `[2.0, 2.5]` to `[2, 3]` changes what reaches the kernel without changing anything a reader
-would look at. `param(key, name, Float64)` converts, and `param(key, name, Int)` refuses a value
-that is not one — `InexactError` at the boundary rather than a silent `Float64` two layers down.
+would look at.
+
+`param(key, name, T)` converts and then checks the value survived it, so any `T` that would have
+altered the number is refused rather than returned. `convert` alone is not enough: it raises for
+`Int` from `2.5`, but silently rounds for `Float64` from `2^53 + 1` and for `Float32` from `2.1` —
+the same silent change of number, one type down from the one this exists to prevent.
 
 ```julia
 a  = param(key, "system.a", Float64)
@@ -31,5 +35,10 @@ function param(key::DataKey, name::AbstractString)
 end
 
 function param(key::DataKey, name::AbstractString, ::Type{T}) where {T}
-    return convert(T, param(key, name))
+    val = param(key, name)
+    converted = convert(T, val)
+    # `==` between an Int and a Float is exact in Julia, so this catches the roundings `convert`
+    # performs silently. `isequal(_, true)` because a comparison can also be `missing`.
+    isequal(converted == val, true) || throw(InexactError(:param, T, val))
+    return converted
 end

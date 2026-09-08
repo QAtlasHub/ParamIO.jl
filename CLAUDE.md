@@ -10,6 +10,8 @@ storage. See [`../CLAUDE.md`](../CLAUDE.md) for how the three layers fit togethe
 - `expand(spec) -> Vector{DataKey}` — Cartesian product of list-valued params × `total_samples`.
 - `format_path(key, path_keys) -> String` — compact on-disk directory segment.
 - `canonical(key) -> String` — stable, order-/version-independent key identity.
+- `param(key, name[, T])` — one parameter, resolved dotted-or-leaf; with `T` it refuses a
+  conversion that would change the number.
 
 ## Two facts that trip up callers
 
@@ -32,7 +34,7 @@ storage. See [`../CLAUDE.md`](../CLAUDE.md) for how the three layers fit togethe
 
 ## Source layout
 
-`src/core/` = public API (`types`, `load`, `expand`, `format`, `canonical`).
+`src/core/` = public API (`types`, `load`, `expand`, `format`, `canonical`, `param`).
 `src/util/` = internal (`grid`, `flatten`, `path_keys`) — renamable without notice.
 
 ## Invariant when changing this package
