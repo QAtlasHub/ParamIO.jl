@@ -337,3 +337,38 @@ end
     @test spec.float_format == "fixed2"
     @test diagnose(spec).ok
 end
+
+@testset "build_axis_formats: a leaf path_key, resolved and refused" begin
+    # `_resolve_axis_value` routes through the shared name resolver and treats BOTH "absent" and
+    # "ambiguous" as "no auto entry". Every other call in this file uses fully dotted path_keys,
+    # which take the exact-match short-circuit — so without this the leaf branch, and the catch
+    # that turns an ambiguous leaf into a skip, are never executed.
+    study = ParamIO.StudySpec("t", 1, "out")
+    block = Dict{String,Any}(
+        "system.a" => [1, 2],
+        "model.a" => [3],
+        "system.g" => [0.5, 0.6],
+        "numerics.h" => [0.25],
+    )
+
+    spec = ParamIO.ConfigSpec(study, ["a", "system.g", "h"], [block], String[], "auto")
+    af = build_axis_formats(spec)
+    @test !haskey(af, "a")          # leaf in two groups -> skipped, not thrown
+    @test haskey(af, "system.g")    # exact dotted -> resolved
+    @test haskey(af, "h")           # unique leaf -> resolved, which is the branch under test
+
+    # …and a name that matches nothing is skipped the same way rather than raising here.
+    spec2 = ParamIO.ConfigSpec(study, ["system.g", "nope"], [block], String[], "auto")
+    af2 = build_axis_formats(spec2)
+    @test !haskey(af2, "nope")
+    @test haskey(af2, "system.g")
+end
+
+@testset "format_path (auto): a leaf path_key drops the group prefix, like the 2-arg form" begin
+    # The 2-arg form has this pinned; the 3-arg one did not. It matters because the leaf branch
+    # formats WITHOUT the group prefix on purpose — "user chose plain name intentionally" — so a
+    # future conversion of this copy to the shared resolver, which returns the resolved KEY, would
+    # start emitting "modg0.50" and silently move where auto-mode results live on disk.
+    key = DataKey(Dict{String,Any}("model.g" => 0.5), 1)
+    @test format_path(key, ["g"], Dict{String,AxisFloatFmt}()) == "g0.50"
+end

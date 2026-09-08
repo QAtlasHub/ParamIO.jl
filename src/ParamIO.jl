@@ -18,6 +18,7 @@ export ConfigSpec, StudySpec, DataKey, AmbiguousPathKeyError
 export load, expand, format_path, resolve_path_keys
 export build_axis_formats, AxisFloatFmt
 export canonical
+export param
 export diagnose, DiagnosticReport
 
 # ── Core ──────────────────────────────────────────────────────────────────────
@@ -26,12 +27,14 @@ include("core/types.jl")
 # ── Util (core が依存する) ────────────────────────────────────────────────────
 include("util/grid.jl")
 include("util/flatten.jl")
+include("util/resolve.jl")
 include("util/path_keys.jl")
 
 # ── Core API ──────────────────────────────────────────────────────────────────
 include("core/load.jl")
 include("core/expand.jl")
 include("core/format.jl")
+include("core/param.jl")
 include("core/canonical.jl")
 include("core/diagnose.jl")
 
