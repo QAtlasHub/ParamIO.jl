@@ -2,7 +2,7 @@
 
 ParamIO is **layer 1** of the HPC compute stack: it turns one config TOML into
 a `Vector{DataKey}` — the list of parameter points a sweep will compute.
-`DataVault` then maps each `DataKey` to storage, and `ParallelManager` runs the
+`DataVault` then maps each `DataKey` to storage, and `SweepRunner` runs the
 work over them. This example makes layer 1's output visible.
 
 ```bash
@@ -40,7 +40,7 @@ DataKey.params                            sample format_path     canonical
 
 - **`format_path` ≠ `canonical`.** `format_path` (the on-disk directory name)
   uses only `path_keys`. `canonical` (the unique, Julia-version-stable key
-  identity used by `ParallelManager`'s manifest and lock) uses *all* params plus
+  identity used by `SweepRunner`'s manifest) uses *all* params plus
   the sample index. Two distinct DataKeys can share a `format_path` but never a
   `canonical`.
 
@@ -62,7 +62,7 @@ Optional: `[datavault] sweep_order` overrides the enumeration order;
 | `load(path) -> ConfigSpec` | parse the TOML (and merge `[base] inherit`) |
 | `expand(spec) -> Vector{DataKey}` | Cartesian product × samples |
 | `format_path(key, path_keys) -> String` | compact directory segment |
-| `canonical(key) -> String` | stable identity (used by ParallelManager) |
+| `canonical(key) -> String` | stable identity (used by SweepRunner) |
 
 See the full stack wired together in
-[`ParallelManager.jl/examples/`](../../ParallelManager.jl/examples/).
+[`SweepRunner.jl/examples/`](../../SweepRunner.jl/examples/).
