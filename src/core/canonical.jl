@@ -13,7 +13,7 @@ Return a string representation of `key` that is:
   guaranteed stable within a Julia version.
 
 This is intended for use as a directory-safe identity by downstream packages
-that need a lookup key (e.g. `ParallelManager.Manifest`, `KeyLock`).
+that need a lookup key (e.g. `SweepRunner.Manifest`).
 
 ## Schema(固定。変更不可)
 

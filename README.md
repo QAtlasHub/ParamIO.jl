@@ -6,7 +6,7 @@
 [![Code Style: Blue](https://img.shields.io/badge/Code%20Style-Blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
 [![codecov](https://codecov.io/gh/QAtlasHub/ParamIO.jl/graph/badge.svg?token=57dh1RFl0t)](https://codecov.io/gh/QAtlasHub/ParamIO.jl)
-[![Build Status](https://github.com/sotashimozono/ParamIO.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/sotashimozono/ParamIO.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/QAtlasHub/ParamIO.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/QAtlasHub/ParamIO.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Read a config TOML and expand it into a list of `DataKey` — one per parameter
@@ -14,13 +14,13 @@ point in a sweep. Pure parsing and Cartesian enumeration: no IO, no storage, no
 side effects.
 
 ParamIO is **layer 1 of a three-package HPC stack**. It answers *what to
-compute*; [`DataVault.jl`](https://github.com/sotashimozono/DataVault.jl) answers
+compute*; [`DataVault.jl`](https://github.com/QAtlasHub/DataVault.jl) answers
 *where results go* (`DataKey` → storage), and
-[`ParallelManager.jl`](https://github.com/sotashimozono/ParallelManager.jl)
+[`SweepRunner.jl`](https://github.com/QAtlasHub/SweepRunner.jl)
 answers *do it* (`run!(work_fn, vault, keys)`, parallel and crash-recoverable).
 
 ```text
-ParamIO            DataVault           ParallelManager
+ParamIO            DataVault           SweepRunner
 config.toml  ──►   Vault(config)  ──►  run!(work_fn, vault, keys)
    │  expand
    ▼
@@ -147,11 +147,11 @@ src/
 
 ## See also
 
-- [DataVault.jl](https://github.com/sotashimozono/DataVault.jl) — storage layer
-- [ParallelManager.jl](https://github.com/sotashimozono/ParallelManager.jl) — the runtime
+- [DataVault.jl](https://github.com/QAtlasHub/DataVault.jl) — storage layer
+- [SweepRunner.jl](https://github.com/QAtlasHub/SweepRunner.jl) — the runtime
 - [`../CLAUDE.md`](../CLAUDE.md) — how the three packages fit together
 
-Issues / requests: [GitHub Issues](https://github.com/sotashimozono/ParamIO.jl/issues).
+Issues / requests: [GitHub Issues](https://github.com/QAtlasHub/ParamIO.jl/issues).
 
 ## License
 

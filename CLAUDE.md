@@ -1,6 +1,6 @@
 # CLAUDE.md — ParamIO.jl
 
-**Layer 1 of the infra HPC stack** (ParamIO → DataVault → ParallelManager):
+**Layer 1 of the infra HPC stack** (ParamIO → DataVault → SweepRunner):
 config TOML → `Vector{DataKey}`. Pure parsing + Cartesian enumeration; no IO, no
 storage. See [`../CLAUDE.md`](../CLAUDE.md) for how the three layers fit together.
 
@@ -30,7 +30,7 @@ storage. See [`../CLAUDE.md`](../CLAUDE.md) for how the three layers fit togethe
 
 - **`examples/inspect.jl`** — run it; prints exactly what `expand` produces (dotted keys, `format_path`, `canonical`). Start here.
 - `README.md` — config schema + API.
-- Full stack: [`../ParallelManager.jl/examples/`](../ParallelManager.jl/examples/).
+- Full stack: [`../SweepRunner.jl/examples/`](../SweepRunner.jl/examples/).
 
 ## Source layout
 
@@ -39,6 +39,6 @@ storage. See [`../CLAUDE.md`](../CLAUDE.md) for how the three layers fit togethe
 
 ## Invariant when changing this package
 
-**`canonical()`'s output schema is FROZEN** — `ParallelManager`'s `Manifest` and
-the per-key lock use it as a directory-safe identity. Changing its format
-silently orphans every existing manifest/lock. Run the test suite locally before pushing.
+**`canonical()`'s output schema is FROZEN** — `SweepRunner`'s `Manifest` uses it
+as a directory-safe identity. Changing its format silently orphans every
+existing manifest. Run the test suite locally before pushing.

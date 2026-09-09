@@ -21,9 +21,10 @@ jobs:
       shards: 4
     # Named rather than inherited: handing an entire secret store to another repository's
     # workflow for one optional token is the wrong shape. Whether it ARRIVES is being measured
-    # on DataVault.jl#36 — a secret did not survive this call from a different ORGANISATION
-    # (lab-sotashimozono/ITensorAD.jl#20), and both this repo and that probe are same-org. If
-    # `collect` warns that no token reached it, add the caller-side upload job
+    # on DataVault.jl#36 — a secret did not survive this call when the caller was in a
+    # DIFFERENT organisation (measured once, on a private repo elsewhere), and both this repo
+    # and that probe are same-org. If `collect` warns that no token reached it, add the
+    # caller-side upload job
     # (QAtlasHub/TestShards.jl/actions/upload-coverage). See QAtlasHub/TestShards.jl#48.
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
