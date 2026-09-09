@@ -1,0 +1,10 @@
+paramio/test_canonical.jl	0.945
+paramio/test_diagnose.jl	6.521
+paramio/test_format_auto.jl	7.623
+paramio/test_format_path_edge.jl	1.046
+paramio/test_grid.jl	8.214
+paramio/test_identity_robustness.jl	3.258
+paramio/test_load_expand_edge.jl	0.568
+paramio/test_param.jl	0.647
+paramio/test_paramio.jl	2.353
+paramio/test_sweep_order.jl	1.354
