@@ -5,6 +5,7 @@ ParamIO — config TOML を読み込み、`DataKey` のリストに展開する
 - `core/types.jl`     データ構造とエラー型
 - `core/load.jl`      TOML 読み込みと継承マージ
 - `core/expand.jl`    Cartesian 展開と sweep 順序制御
+- `core/project.jl`   キー空間の座標射影
 - `core/format.jl`    DataKey からパス文字列を生成
 - `util/grid.jl`      `{start,stop,length|step}` grid spec → sweep リスト展開
 - `util/flatten.jl`   サブテーブルのフラット化、ドット記法分解
@@ -15,10 +16,11 @@ module ParamIO
 using TOML, Printf
 
 export ConfigSpec, StudySpec, DataKey, AmbiguousPathKeyError
-export load, expand, format_path, resolve_path_keys
+export load, expand, expand_report, format_path, resolve_path_keys
 export build_axis_formats, AxisFloatFmt
 export canonical
 export param
+export project
 export diagnose, DiagnosticReport
 
 # ── Core ──────────────────────────────────────────────────────────────────────
@@ -33,6 +35,7 @@ include("util/path_keys.jl")
 # ── Core API ──────────────────────────────────────────────────────────────────
 include("core/load.jl")
 include("core/expand.jl")
+include("core/project.jl")
 include("core/format.jl")
 include("core/param.jl")
 include("core/canonical.jl")

@@ -1,0 +1,24 @@
+# Three blocks over one axis: the second repeats the first entirely, the third shares one value
+# and adds one. 4 + 4 + 2 produced, 4 + 0 + 1 kept.
+[study]
+project_name  = "test_overlap"
+total_samples = 1
+outdir        = "out"
+
+[datavault]
+path_keys = ["system.N"]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [1, 2, 3, 4]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [1, 2, 3, 4]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [4, 5]

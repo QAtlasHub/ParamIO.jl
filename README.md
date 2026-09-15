@@ -74,6 +74,26 @@ J = 1.0                         # scalar ⇒ fixed (still present in every DataK
 `[[paramsets]]` block, multiplies by `total_samples`, and deduplicates. Optional
 `[base] inherit = "parent.toml"` merges a parent config first.
 
+Deduplication is across blocks, so `length(expand(spec))` is **not** the product of the axis
+lengths whenever two blocks overlap. The first block to produce a point also fixes its position,
+which makes a small leading block a way to order a long acquisition: put the slice you want closed
+first at the top, let it overlap a later broader block, and pay nothing for the repeat.
+`expand_report(spec)` returns the per-block contribution, which is what tells a block that added
+nothing from a block that was never read.
+
+### Projections
+
+A piece of a sweep's work often depends on only some of its axes. `project` is that sub-key space,
+as an ordinary `ConfigSpec`, so the rest of the stack applies to it unchanged:
+
+```julia
+states = ParamIO.project(spec, ["system.L", "model.lambda", "thermal.beta"]; total_samples=1)
+length(ParamIO.expand(states))   # how many distinct states this config needs
+```
+
+Every other parameter is dropped. `DataKey.sample` is not a parameter, so `total_samples` rather
+than `axes` decides whether the projection keeps the sample dimension.
+
 ### Grid axes — concise sweeps
 
 For a fine Monte-Carlo or finite-size-scaling sweep, write an axis as a **grid** instead of a
@@ -126,6 +146,8 @@ name); `canonical` uses *all* params plus the sample index.
 | --- | --- |
 | `load(path; inherit=true) -> ConfigSpec` | parse TOML, merge `[base] inherit` |
 | `expand(spec; sweep_order=nothing) -> Vector{DataKey}` | Cartesian product × samples |
+| `expand_report(spec; sweep_order=nothing) -> NamedTuple` | the same keys, plus what deduplication removed |
+| `project(spec, axes; total_samples=…) -> ConfigSpec` | the spec over `axes` alone |
 | `format_path(key, path_keys) -> String` | compact directory segment |
 | `canonical(key) -> String` | stable, Julia-version-independent key identity |
 | `param(key, name[, T]) -> value` | one parameter, resolved dotted-or-leaf and optionally typed |
@@ -140,6 +162,7 @@ src/
 │   ├── types.jl      DataKey, ConfigSpec, StudySpec, errors
 │   ├── load.jl       TOML load + inherit merge
 │   ├── expand.jl     Cartesian expansion + sweep order
+│   ├── project.jl    project (a coordinate projection of the key space)
 │   ├── format.jl     format_path
 │   └── canonical.jl  canonical (FROZEN schema — downstream identity)
 └── util/             internal (flatten, path_keys)
