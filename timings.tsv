@@ -1,0 +1,13 @@
+aqua/test_aqua.jl	10.914
+paramio/test_canonical.jl	0.915
+paramio/test_diagnose.jl	4.255
+paramio/test_expand_report.jl	0.562
+paramio/test_format_auto.jl	4.845
+paramio/test_format_path_edge.jl	0.981
+paramio/test_grid.jl	4.952
+paramio/test_identity_robustness.jl	2.094
+paramio/test_load_expand_edge.jl	0.545
+paramio/test_param.jl	0.488
+paramio/test_paramio.jl	2.32
+paramio/test_project.jl	1.194
+paramio/test_sweep_order.jl	1.09
