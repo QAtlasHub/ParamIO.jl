@@ -19,6 +19,17 @@ order. The default order is, in priority:
 Sweep keys not listed in the chosen ordering are appended at the end in
 sorted order, so the result is always deterministic.
 
+# Deduplication
+
+Two blocks that produce the same point yield one key, so `length(expand(spec))` is not the product
+of the axis lengths whenever blocks overlap. The first block to produce a point also fixes its
+position, which is what makes a small leading block a way to order a long acquisition: put the slice
+to close first at the top, overlapping a later broader block, and only the position survives.
+
+Sameness is `canonical`, the on-disk directory identity, not `Dict` equality: `1` and `1.0` get
+different directories and are both kept. [`expand_report`](@ref) returns how many were collapsed,
+which is what separates "my new block added nothing" from "my new block was not read".
+
 # Example
 
 ```julia
@@ -30,6 +41,23 @@ keys = ParamIO.expand(spec; sweep_order=["model.h", "system.N"])  # explicit
 function expand(
     spec::ConfigSpec; sweep_order::Union{Nothing,Vector{String}}=nothing
 )::Vector{DataKey}
+    return expand_report(spec; sweep_order=sweep_order).keys
+end
+
+"""
+    expand_report(spec; sweep_order=nothing) -> NamedTuple
+
+[`expand`](@ref)'s keys together with what deduplication removed to get them:
+
+- `keys`, `points`: the keys, and the distinct parameter points behind them
+  (`length(keys) == points * spec.study.total_samples`);
+- `duplicates`: points dropped for repeating an earlier one;
+- `per_paramset`: one `(; produced, kept, duplicate)` per `[[paramsets]]` block, in block order.
+
+`per_paramset[i].kept == 0` is a block that contributed nothing, which a total alone cannot tell
+from a block that was never read.
+"""
+function expand_report(spec::ConfigSpec; sweep_order::Union{Nothing,Vector{String}}=nothing)
     order = if sweep_order !== nothing
         sweep_order
     elseif !isempty(spec.sweep_order)
@@ -38,35 +66,44 @@ function expand(
         spec.path_keys
     end
 
-    # Deduplicate on the canonical identity, NOT on raw `Dict` equality. `Dict`
-    # `==` treats `1 == 1.0`, but `canonical` (the on-disk identity used by the
-    # downstream packages) keeps them distinct. Keying dedup on `canonical` makes
-    # expand's notion of "same point" identical to the on-disk directory
-    # identity: points that would share a directory are deduped, points that
-    # would get different directories are both kept. (sample is fixed at 0 here;
-    # it does not affect the param identity.)
+    # Dedup on the canonical identity, NOT on raw `Dict` equality. `Dict` `==` treats `1 == 1.0`,
+    # but `canonical` (the on-disk identity used by the downstream packages) keeps them distinct,
+    # so points that would share a directory are deduped and points that would get different ones
+    # are both kept. (sample is fixed at 0 here; it does not affect the param identity.)
     seen = Set{String}()
     points = Dict{String,Any}[]
+    per_paramset = @NamedTuple{produced::Int, kept::Int, duplicate::Int}[]
 
     for block in spec.paramsets
+        produced = 0
+        kept = 0
         for pt in _cartesian_product(block, order)
+            produced += 1
             id = canonical(DataKey(pt, 0))
             if id ∉ seen
                 push!(seen, id)
                 push!(points, pt)
+                kept += 1
             end
         end
+        push!(per_paramset, (; produced, kept, duplicate=produced - kept))
     end
 
     result = DataKey[]
     for pt in points
         for s in 1:spec.study.total_samples
-            # `copy` so sibling samples don't alias one shared mutable `params`
-            # Dict — mutating one key's params must not corrupt its siblings.
+            # `copy` so sibling samples don't alias one shared mutable `params` Dict; mutating one
+            # key's params must not corrupt its siblings.
             push!(result, DataKey(copy(pt), s))
         end
     end
-    return result
+
+    return (;
+        keys=result,
+        points=length(points),
+        duplicates=sum(p -> p.duplicate, per_paramset; init=0),
+        per_paramset,
+    )
 end
 
 """

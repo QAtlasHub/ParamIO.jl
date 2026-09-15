@@ -1,0 +1,18 @@
+# `24` and `24.0` are one point to `Dict` equality and two directories to `canonical`.
+[study]
+project_name  = "test_int_float"
+total_samples = 1
+outdir        = "out"
+
+[datavault]
+path_keys = ["system.N"]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [24]
+
+[[paramsets]]
+
+[paramsets.system]
+N = [24.0]
