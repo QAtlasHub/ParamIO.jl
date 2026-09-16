@@ -4,17 +4,18 @@
     project(spec, axes; total_samples=spec.study.total_samples) -> ConfigSpec
 
 The spec over `axes` alone: every other parameter is dropped, so the keys `expand` returns from it
-are the distinct values of `key -> (axes...)` across the original sweep.
+are the distinct values of `key -> (axes...)` across the original sweep, once per sample.
 
 Names resolve as they do for [`param`](@ref): exact dotted match, else a unique leaf. An axis absent
 from any one `[[paramsets]]` block is refused, because the projection is then undefined on that
 block's keys rather than merely narrower.
 
-`DataKey.sample` is not a parameter, so no entry of `axes` can select it; `total_samples` is how a
-projection that does not depend on the sample index collapses it to `1`.
+`DataKey.sample` is not a parameter, so no entry of `axes` can select it. A projection that does
+not depend on the sample index wants `total_samples=1`; left at the study's value, `expand` repeats
+every projected point `spec.study.total_samples` times.
 
 ```julia
-states = expand(project(spec, ["system.L", "model.lambda", "thermal.beta"]))
+states = expand(project(spec, ["system.L", "model.lambda", "thermal.beta"]; total_samples=1))
 ```
 """
 function project(
