@@ -1,0 +1,23 @@
+# Sweep over (U, D, omega1); a ground state that depends on (U, D) and a fixed cutoff, not omega1.
+[study]
+project_name = "artifacts_fixture"
+total_samples = 2
+
+[datavault]
+path_keys = ["run.U", "run.D", "run.omega1"]
+
+[[paramsets]]
+[paramsets.run]
+U      = [0.0, 0.2]
+D      = [32, 64]
+omega1 = [1.2, 1.5, 1.8]
+cutoff = 1.0e-14
+deltas = {const = [0.5, 0.1]}
+
+[artifacts.ground_state]
+depends_on = ["U", "run.D", "cutoff", "deltas"]
+version    = 3
+
+[artifacts.noise]
+depends_on = ["run.U"]
+per_sample = true

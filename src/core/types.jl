@@ -34,6 +34,32 @@ struct StudySpec
 end
 
 """
+    ArtifactSpec
+
+An intermediate result that many sweep points share, declared in `[artifacts.<name>]`:
+
+```toml
+[artifacts.ground_state]
+depends_on = ["run.U", "run.D", "run.cutoff"]   # the parameters it is a function of
+version    = 2                                   # bump when the code that builds it changes
+per_sample = false                               # true if it also depends on the sample index
+```
+
+Its identity is the key **projected onto `depends_on`** plus `version` — see
+[`artifact_key`](@ref) and [`artifact_identity`](@ref). A parameter left out of `depends_on`
+does not invalidate it, so an artifact that reads a knob it does not declare is silently
+reused across that knob's values.
+
+Fields: `name`, `depends_on` (resolved to dotted keys), `version`, `per_sample`.
+"""
+struct ArtifactSpec
+    name::String
+    depends_on::Vector{String}
+    version::Int
+    per_sample::Bool
+end
+
+"""
     ConfigSpec
 
 Parsed representation of a config TOML.
@@ -49,6 +75,8 @@ Fields:
                   the legacy `%.2f`) or `"auto"` (content-aware, per-axis
                   injective+lossless; see `build_axis_formats` / `format_path`).
                   Set via `[datavault] float_format`. Never affects `canonical`.
+- `artifacts`:    `[artifacts.<name>]` tables, by name — see [`ArtifactSpec`](@ref).
+                  Empty when the config declares none.
 """
 struct ConfigSpec
     study::StudySpec
@@ -56,6 +84,20 @@ struct ConfigSpec
     paramsets::Vector{Dict{String,Any}}
     sweep_order::Vector{String}
     float_format::String
+    artifacts::Dict{String,ArtifactSpec}
+end
+
+# Backward-compatible constructor (no artifacts)
+function ConfigSpec(
+    study::StudySpec,
+    path_keys::Vector{String},
+    paramsets::Vector{Dict{String,Any}},
+    sweep_order::Vector{String},
+    float_format::String,
+)
+    return ConfigSpec(
+        study, path_keys, paramsets, sweep_order, float_format, Dict{String,ArtifactSpec}()
+    )
 end
 
 # Backward-compatible constructor (no float_format) → legacy fixed2 default
