@@ -94,6 +94,36 @@ length(ParamIO.expand(states))   # how many distinct states this config needs
 Every other parameter is dropped. `DataKey.sample` is not a parameter, so `total_samples` rather
 than `axes` decides whether the projection keeps the sample dimension.
 
+### Artifacts — intermediate results shared across cells
+
+When the expensive part of a cell depends on only some of its axes — a ground state that does
+not depend on the drive frequency — declare it, and name every parameter it reads:
+
+```toml
+[[paramsets]]
+[paramsets.run]
+U      = [0.0, 0.2]
+D      = [64, 128]
+omega1 = [1.2, 1.5, 1.8]
+cutoff = 1.0e-14                     # fixed knobs are ordinary scalars, so they are in the key
+
+[artifacts.ground_state]
+depends_on = ["U", "D", "cutoff"]    # resolved like path_keys: dotted, or a unique leaf
+version    = 1                       # bump when the code that builds it changes
+# per_sample = true                  # if it also depends on the sample index
+```
+
+```julia
+artifact_identity(spec, :ground_state, key)  # "ground_state@v1|run.D=64;run.U=0.0;run.cutoff=1.0e-14;#sample=1"
+artifact_keys(spec, :ground_state)           # the 4 distinct points the 12 cells need
+```
+
+ParamIO only says what an artifact **is**; storing, locking and reusing it is DataVault's job.
+The identity is exactly `depends_on` plus `version`, so **a parameter the builder reads but
+`depends_on` omits does not invalidate it** — the artifact is then reused across that
+parameter's values. `load` refuses an unknown field, an empty `depends_on` and a name some
+`[[paramsets]]` block lacks, because each of those silently widens what is shared.
+
 ### Grid axes — concise sweeps
 
 For a fine Monte-Carlo or finite-size-scaling sweep, write an axis as a **grid** instead of a
@@ -148,6 +178,10 @@ name); `canonical` uses *all* params plus the sample index.
 | `expand(spec; sweep_order=nothing) -> Vector{DataKey}` | Cartesian product × samples |
 | `expand_report(spec; sweep_order=nothing) -> NamedTuple` | the same keys, plus what deduplication removed |
 | `project(spec, axes; total_samples=…) -> ConfigSpec` | the spec over `axes` alone |
+| `project(key, axes; sample=key.sample) -> DataKey` | one key over `axes` alone |
+| `artifact_key(spec, name, key) -> DataKey` | the point of artifact `name` that `key` needs |
+| `artifact_identity(spec, name, key) -> String` | that point as a stable on-disk identity, with `version` |
+| `artifact_keys(spec, name) -> Vector{DataKey}` | every distinct point of artifact `name` the sweep needs |
 | `format_path(key, path_keys) -> String` | compact directory segment |
 | `canonical(key) -> String` | stable, Julia-version-independent key identity |
 | `param(key, name[, T]) -> value` | one parameter, resolved dotted-or-leaf and optionally typed |

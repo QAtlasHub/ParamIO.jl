@@ -50,7 +50,9 @@ function load(path::AbstractString; inherit::Bool=true)::ConfigSpec
         "fixed2"
     end
 
-    return ConfigSpec(study, path_keys, flat_blocks, sweep_order, float_format)
+    artifacts = _parse_artifacts(raw, flat_blocks)
+
+    return ConfigSpec(study, path_keys, flat_blocks, sweep_order, float_format, artifacts)
 end
 
 """

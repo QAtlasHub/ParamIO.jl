@@ -47,11 +47,18 @@ function project(
 
     blocks = [Dict{String,Any}(k => b[k] for k in resolved) for b in spec.paramsets]
 
+    # An artifact survives the projection only if every axis it depends on does; otherwise its
+    # identity is undefined on the projected keys.
+    artifacts = Dict{String,ArtifactSpec}(
+        n => a for (n, a) in spec.artifacts if all(in(resolved), a.depends_on)
+    )
+
     return ConfigSpec(
         StudySpec(spec.study.project_name, Int(total_samples), spec.study.outdir),
         copy(resolved),
         blocks,
         filter(in(resolved), spec.sweep_order),
         spec.float_format,
+        artifacts,
     )
 end
